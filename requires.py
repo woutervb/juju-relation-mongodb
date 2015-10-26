@@ -20,7 +20,7 @@ class MongoDBClient(RelationBase):
     # We only expect a single mongodb server to be related.  Additionally, if
     # there are multiple units, it would be for replication purposes only,
     # so we would expect a leader to provide our connection info, or at least
-    # for all pgsql units to agree on the connection info.  Thus, we use a
+    # for all mongodb units to agree on the connection info.  Thus, we use a
     # global conversation scope in which all services and units share the
     # same conversation.
     # TODO (mattyw, cmars) Talk to cory about this.
