@@ -30,11 +30,18 @@ class MongoDBClient(RelationBase):
     # with a basic documentation string provided.
     auto_accessors = ['hostname', 'port']
 
-    @hook('{requires:mongodb}-relation-{joined,changed}')
+    @hook('{requires:mongodb}-relation-{changed}')
     def changed(self):
         self.set_state('{relation_name}.connected')
         if self.connection_string():
             self.set_state('{relation_name}.database.available')
+        else:
+            self.set_state('{relation_name}.database.unavailable')
+
+    @hook('{requires:mongodb}-relation-{broken}')
+    def broken(self):
+        self.set_state('{relation_name}.connected')
+        self.set_state('{relation_name}.database.unavailable')
 
     def connection_string(self):
         """
