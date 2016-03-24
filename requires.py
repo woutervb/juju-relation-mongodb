@@ -37,7 +37,7 @@ class MongoDBClient(RelationBase):
     @hook('{requires:mongodb}-relation-changed')
     def changed(self):
         if self.connection_string():
-            self.set_state('{relation_name}.changed')
+            self.set_state('{relation_name}.database.available')
         else:
             self.set_state('{relation_name}.removed')
 
