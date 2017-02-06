@@ -38,6 +38,7 @@ class MongoDBClient(RelationBase):
     def changed(self):
         if self.connection_string():
             self.set_state('{relation_name}.database.available')
+            self.set_state('{relation_name}.available')
         else:
             self.set_state('{relation_name}.removed')
 
