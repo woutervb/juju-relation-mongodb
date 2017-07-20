@@ -17,18 +17,7 @@ from charms.reactive import scopes
 
 
 class MongoDBClient(RelationBase):
-    # We only expect a single mongodb server to be related.  Additionally, if
-    # there are multiple units, it would be for replication purposes only,
-    # so we would expect a leader to provide our connection info, or at least
-    # for all mongodb units to agree on the connection info.  Thus, we use a
-    # global conversation scope in which all services and units share the
-    # same conversation.
-    # TODO (mattyw, cmars) Talk to cory about this.
-    scope = scopes.GLOBAL
-
-    # These remote data fields will be automatically mapped to accessors
-    # with a basic documentation string provided.
-    auto_accessors = ['hostname', 'port']
+    scope = scopes.UNIT
 
     @hook('{requires:mongodb}-relation-joined')
     def joined(self):
@@ -36,7 +25,7 @@ class MongoDBClient(RelationBase):
 
     @hook('{requires:mongodb}-relation-changed')
     def changed(self):
-        if self.connection_string():
+        if self.connection_strings():
             self.set_state('{relation_name}.database.available')
             self.set_state('{relation_name}.available')
         else:
@@ -50,14 +39,16 @@ class MongoDBClient(RelationBase):
     def broken(self):
         self.set_state('{relation_name}.removed')
 
-    def connection_string(self):
+    def connection_strings(self):
         """
-        Get the connection string, if available, or None.
+        Get the connection strings for each conversation if available, or [].
         """
-        data = {
-            'hostname': self.hostname(),
-            'port': self.port(),
-        }
-        if all(data.values()):
-            return str.format('{hostname}:{port}', **data)
-        return None
+        connection_strings = []
+        for conv in self.conversations():
+            data = {
+                'hostname': conv.get_remote('hostname'),
+                'port': conv.get_remote('port'),
+            }
+            if all(data.values()):
+                connection_strings.append(str.format('{hostname}:{port}', **data))
+        return connection_strings
